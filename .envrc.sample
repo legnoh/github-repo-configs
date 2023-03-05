@@ -1,0 +1,5 @@
+export GITHUB_REPOSITORY_OWNER=yourname
+export GITHUB_TOKEN="ghp_XXXX"
+export TF_CLOUD_ORGANIZATION=yourorg
+export TF_WORKSPACE=yourworkspace
+export TF_TOKEN_app_terraform_io="XXXXXX......XXXXXX"

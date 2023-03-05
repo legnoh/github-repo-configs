@@ -1,0 +1,49 @@
+#!/bin/bash
+
+GITHUB_API_URL=${GITHUB_API_URL:-"https://api.github.com"}
+GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER:?}
+GITHUB_TOKEN=${GITHUB_TOKEN:?}
+
+mkdir -p ./tmp
+
+echo "Step1: Get GitHub Repositories"
+curl -G "${GITHUB_API_URL}/users/${GITHUB_REPOSITORY_OWNER}/repos" \
+  --data-urlencode "per_page=100" 2> /dev/null \
+  | jq '{ repos: [sort_by(.name) | .[] | select(.archived == false and .visibility == "public")] }' > ./repos.auto.tfvars.json
+
+cat ./repos.auto.tfvars.json | jq -r ".repos[].name" > ./tmp/repo_names_gh
+if [[ $(cat ./tmp/repo_names_gh | wc -l) -eq 0 ]]; then
+  echo "repo_names file is something wrong. exit."
+  exit 1
+fi
+
+echo "Step2: Get repo info from terraform state"
+terraform state list \
+  | grep module.repos \
+  | sed -e 's/module.repos\[\"//' \
+    -e 's/\"\].github_branch_default.main//' \
+    -e 's/\"\].github_branch_protection.main//' \
+    -e 's/\"\].github_repository_file.codeowners//' \
+    -e 's/\"\].github_repository.repo//' \
+    -e 's/\[0\]//g' \
+  | sort | uniq > ./tmp/repo_names_tf
+diff ./tmp/repo_names_tf ./tmp/repo_names_gh > ./tmp/repos.diff
+
+echo "Step3: Import and Destroy"
+while read diffline
+do
+    annotate=${diffline::2}
+    repo=${diffline:2}
+
+    # Created --> import
+    if [[ ${annotate} == '> ' ]]; then
+      echo "import: ${repo}"
+      terraform import module.repos\[\"${repo}\"\].github_repository.repo ${repo}
+
+    # Archived/Deleted -> state rm
+    elif [[ ${annotate} == '< ' ]]; then
+      echo "state rm: ${repo}"
+      terraform state rm module.repos\[\"${repo}\"\]
+    fi
+
+done < ./tmp/repos.diff
