@@ -26,9 +26,9 @@ jobs:
       run: terraform init
     
     - name: Prepare execution
+      env:
+        GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
       run: .github/workflows/prepare.sh
     
     - name: Terraform Plan
-      env:
-        GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
       run: terraform plan
