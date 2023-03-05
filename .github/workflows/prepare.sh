@@ -21,6 +21,7 @@ fi
 
 echo "Step2: Get repo info from terraform state"
 terraform state list module.repos \
+  | grep -v "::debug::stdout:" \
   | grep .github_repository.repo \
   | sed -e 's/^module.repos\[\"\(.*\)\"\].github_repository.repo/\1/' \
   | sort | uniq > ./tmp/repo_names_tf
