@@ -19,6 +19,15 @@ Usage
 - Get [Terraform Cloud User API Token](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens).
 - Change [Terraform Cloud's Execution Mode](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings#execution-mode) to "Local".
 
+### Topic options
+
+This config uses [GitHub topics](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics) for setting options.
+If you have any special repository, please set below topic.
+
+- `no-codeowners`: `.github/CODEOWNERS` file isn't created.
+- `no-branch-protection`: Branch Protection Rule isn't created.
+- `netlify`: Netlify's deploy-preview add to `required_status_checks` contexts.
+
 ### Command(local)
 
 ```sh
