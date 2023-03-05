@@ -20,14 +20,9 @@ if [[ $(cat ./tmp/repo_names_gh | wc -l) -eq 0 ]]; then
 fi
 
 echo "Step2: Get repo info from terraform state"
-terraform state list \
-  | grep module.repos \
-  | sed -e 's/module.repos\[\"//' \
-    -e 's/\"\].github_branch_default.main//' \
-    -e 's/\"\].github_branch_protection.main//' \
-    -e 's/\"\].github_repository_file.codeowners//' \
-    -e 's/\"\].github_repository.repo//' \
-    -e 's/\[0\]//g' \
+terraform state list module.repos \
+  | grep .github_repository.repo \
+  | sed -e 's/^module.repos\[\"\(.*\)\"\].github_repository.repo/\1/' \
   | sort | uniq > ./tmp/repo_names_tf
 diff ./tmp/repo_names_tf ./tmp/repo_names_gh > ./tmp/repos.diff
 
