@@ -25,9 +25,16 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-    
+
     - name: Prepare execution
       run: .github/workflows/prepare.sh
-    
+
     - name: Terraform Plan
       run: terraform plan
+
+    - name: Upload tmp folder
+      uses: actions/upload-artifact@v3
+      if: ${{ always() }}
+      with:
+        path: tmp/**
+
