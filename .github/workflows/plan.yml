@@ -20,15 +20,16 @@ jobs:
       run: terraform fmt -check
 
     - name: Terraform Init
-      env:
+      env: &common_env
         TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
         TF_WORKSPACE: ${{ secrets.TF_WORKSPACE }}
+        GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
       run: terraform init
     
     - name: Prepare execution
-      env:
-        GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
+      env: *common_env
       run: .github/workflows/prepare.sh
     
     - name: Terraform Plan
+      env: *common_env
       run: terraform plan
