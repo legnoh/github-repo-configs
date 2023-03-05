@@ -5,7 +5,7 @@
 
 GitHub auto config setting script with GitHub Actions & [Terraform GitHub Provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
 
-- Public personal repository are setting automatically you desired.
+- Public personal repository are setting automatically [you desired](https://github.com/legnoh/github-repo-configs/blob/main/modules/repo/main.tf).
 - States are automatically controlled if you created,archived or deleted repository.
 
 Usage
