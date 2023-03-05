@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 GITHUB_API_URL=${GITHUB_API_URL:-"https://api.github.com"}
 GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER:?}
 GITHUB_TOKEN=${GITHUB_TOKEN:?}
