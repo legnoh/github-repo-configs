@@ -21,7 +21,7 @@ Usage
 
 ### Topic options
 
-This config uses [GitHub topics](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics) for setting options.
+This config uses [**GitHub topics**](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics) for setting options.
 If you have any special repository, please set below topic.
 
 - `no-codeowners`: `.github/CODEOWNERS` file isn't created.
