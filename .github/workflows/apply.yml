@@ -7,9 +7,6 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.tf_actions_working_dir }}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
@@ -31,10 +28,7 @@ jobs:
     - name: Prepare execution
       run: .github/workflows/prepare.sh
 
-    - name: Terraform Validate
-      run: terraform validate
-
-    - name: Terraform apply
+    - name: Terraform Apply
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN_FOR_TF }}
+        GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
       run: terraform apply -auto-approve

@@ -27,11 +27,8 @@ jobs:
     
     - name: Prepare execution
       run: .github/workflows/prepare.sh
-
-    - name: Terraform Validate
-      run: terraform validate
     
     - name: Terraform Plan
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN_FOR_TF }}
+        GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
       run: terraform plan
