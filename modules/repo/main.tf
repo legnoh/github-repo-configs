@@ -68,7 +68,7 @@ resource "github_branch_protection" "main" {
   }
   
   required_status_checks {
-    strict   = false
+    strict   = true
     contexts = ( contains(var.topics, "netlify")
         ? ["netlify/${github_repository.repo.name}/deploy-preview"]
         : null
