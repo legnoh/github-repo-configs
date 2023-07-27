@@ -46,8 +46,8 @@ terraform apply
 
 ```sh
 export REPO="..."
-terraform import module.repos\[\"${REPO}\"\].github_branch_protection.main\[0\] ${REPO}:main
-terraform import module.repos\[\"${REPO}\"\].github_repository_file.codeowners\[0\] ${REPO}/.github/CODEOWNERS:main
+terraform import "module.repos[\"${REPO}\"].github_branch_protection.main[0]" ${REPO}:main
+terraform import "module.repos[\"${REPO}\"].github_repository_file.codeowners[0]" ${REPO}/.github/CODEOWNERS:main
 ```
 
 ### GitHub Actions(CI)
