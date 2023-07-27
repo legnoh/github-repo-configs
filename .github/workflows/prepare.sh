@@ -33,8 +33,8 @@ do
     # Created --> import
     if [[ ${annotate} == '> ' ]]; then
       echo "import: ${repo}"
-      terraform import module.repos\[\"${repo}\"\].github_repository.repo ${repo}
-      terraform import module.repos\[\"${repo}\"\].github_branch_default.main ${repo}
+      terraform import "module.repos[\"${repo}\"].github_repository.repo" ${repo}
+      terraform import "module.repos[\"${repo}\"].github_branch_default.main" ${repo}
 
     # Archived/Deleted -> state rm
     elif [[ ${annotate} == '< ' ]]; then
