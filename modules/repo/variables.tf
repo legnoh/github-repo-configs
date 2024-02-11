@@ -13,3 +13,7 @@ variable "default_branch" {
 variable "topics" {
   type = list(string)
 }
+
+variable "pr_job_names" {
+  type = list(string)
+}

@@ -9,4 +9,5 @@ module "repos" {
   name           = each.value.name
   default_branch = each.value.default_branch
   topics         = each.value.topics
+  pr_job_names   = each.value.pr_job_names
 }

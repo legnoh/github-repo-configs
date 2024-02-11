@@ -26,7 +26,6 @@ If you have any special repository, please set below topic.
 
 - `no-codeowners`: `.github/CODEOWNERS` file isn't created.
 - `no-branch-protection`: Branch Protection Rule isn't created.
-- `netlify`: Netlify's deploy-preview add to `required_status_checks` contexts.
 
 ### Command(local)
 

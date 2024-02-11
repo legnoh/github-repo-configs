@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 GITHUB_API_URL=${GITHUB_API_URL:-"https://api.github.com"}
 GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER:?}
 GITHUB_TOKEN=${GITHUB_TOKEN:?}
@@ -7,9 +9,13 @@ GITHUB_TOKEN=${GITHUB_TOKEN:?}
 mkdir -p ./tmp
 
 echo "Step1: Get GitHub Repositories"
-curl -G "${GITHUB_API_URL}/users/${GITHUB_REPOSITORY_OWNER}/repos" \
-  --data-urlencode "per_page=100" 2> /dev/null \
-  | jq '{ repos: [sort_by(.name) | .[] | select(.archived == false and .visibility == "public")] }' > ./repos.auto.tfvars.json
+gh repo list --no-archived --limit 1000 --json=name,defaultBranchRef,repositoryTopics,isEmpty,visibility \
+  | jq "[sort_by(.name) | .[] \
+      | select(.isEmpty == false and .visibility == \"PUBLIC\") \
+      | .repositoryTopics |= if . != null then [.[].name] else [] end \
+      | { name:.name, default_branch:.defaultBranchRef.name, topics:.repositoryTopics } \
+    ] as \$res \
+    | { repos: \$res }" > ./repos.auto.tfvars.json
 
 cat ./repos.auto.tfvars.json | jq -r ".repos[].name" > ./tmp/repo_names_gh
 if [[ $(cat ./tmp/repo_names_gh | wc -l) -eq 0 ]]; then
@@ -43,3 +49,31 @@ do
     fi
 
 done < ./tmp/repos.diff
+
+echo "Step4: inject github job data to reviewers"
+while read reponame
+do
+  # get pr workflow_runs of latest commit
+  repos_raw=$(cat repos.auto.tfvars.json)
+  latest_pr_runs_urls=$(gh api /repos/${GITHUB_REPOSITORY_OWNER}/${reponame}/actions/runs \
+  | jq -r "[ .workflow_runs[] \
+      | select(.event == \"pull_request\" or .event == \"pull_request_target\") \
+      | { name:.name, head_sha:.head_sha, jobs_url:.jobs_url }] as \$wf_runs \
+    | \$wf_runs[0].head_sha as \$first_sha \
+    | \$wf_runs[] | select(.head_sha == \$first_sha) | .jobs_url")
+
+  all_job_names=""
+  for runs_url in ${latest_pr_runs_urls}
+  do
+    job_names=$(gh api ${runs_url} | jq -r "[.jobs[].name] | @json")
+    if [[ ${all_job_names} == "" ]]; then
+        all_job_names=${job_names}
+    else
+        all_job_names="${all_job_names},${job_names}"
+    fi
+  done
+  all_job_names_array=$(echo "[${all_job_names}]" | jq ". | add")
+  target_index=$(echo ${repos_raw} | jq -r ".repos | map(.name == \"${reponame}\") | index(true)")
+  echo ${repos_raw} | jq ".repos[${target_index}].pr_job_names += ${all_job_names_array}" > repos.auto.tfvars.json
+
+done < ./tmp/repo_names_gh
