@@ -55,12 +55,17 @@ while read reponame
 do
   # get pr workflow_runs of latest commit
   repos_raw=$(cat repos.auto.tfvars.json)
-  latest_pr_runs_urls=$(gh api /repos/${GITHUB_REPOSITORY_OWNER}/${reponame}/actions/runs \
+  latest_pr_runs_urls_pr=$(gh api "/repos/${GITHUB_REPOSITORY_OWNER}/${reponame}/actions/runs?event=pull_request" \
   | jq -r "[ .workflow_runs[] \
-      | select(.event == \"pull_request\" or .event == \"pull_request_target\") \
       | { name:.name, head_sha:.head_sha, jobs_url:.jobs_url }] as \$wf_runs \
     | \$wf_runs[0].head_sha as \$first_sha \
     | \$wf_runs[] | select(.head_sha == \$first_sha) | .jobs_url")
+  latest_pr_runs_urls_prt=$(gh api "/repos/${GITHUB_REPOSITORY_OWNER}/${reponame}/actions/runs?event=pull_request_target" \
+  | jq -r "[ .workflow_runs[] \
+      | { name:.name, head_sha:.head_sha, jobs_url:.jobs_url }] as \$wf_runs \
+    | \$wf_runs[0].head_sha as \$first_sha \
+    | \$wf_runs[] | select(.head_sha == \$first_sha) | .jobs_url")
+  latest_pr_runs_urls=$(printf '%s\n' ${latest_pr_runs_urls_pr} ${latest_pr_runs_urls_prt})
 
   all_job_names=""
   for runs_url in ${latest_pr_runs_urls}
