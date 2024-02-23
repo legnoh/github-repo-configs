@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+# set -x
 
 GITHUB_API_URL=${GITHUB_API_URL:-"https://api.github.com"}
 GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER:?}
@@ -13,7 +13,7 @@ gh repo list --no-archived --limit 1000 --json=name,defaultBranchRef,repositoryT
   | jq "[sort_by(.name) | .[] \
       | select(.isEmpty == false and .visibility == \"PUBLIC\") \
       | .repositoryTopics |= if . != null then [.[].name] else [] end \
-      | { name:.name, default_branch:.defaultBranchRef.name, topics:.repositoryTopics } \
+      | { name:.name, default_branch:.defaultBranchRef.name, topics:.repositoryTopics, pr_job_names:[] } \
     ] as \$res \
     | { repos: \$res }" > ./repos.auto.tfvars.json
 
@@ -38,14 +38,33 @@ do
 
     # Created --> import
     if [[ ${annotate} == '> ' ]]; then
-      echo "import: ${repo}"
+      echo "-> import: ${repo}"
+
+      echo "--> github_repository.repo"
       terraform import "module.repos[\"${repo}\"].github_repository.repo" ${repo}
+      echo "--> github_branch_default.main"
       terraform import "module.repos[\"${repo}\"].github_branch_default.main" ${repo}
+
+      default_branch=$(cat ./repos.auto.tfvars.json | jq -r ".repos[] | select(.name == \"${repo}\") | .default_branch")
+
+      ## codeowners file
+      if gh api --silent -X HEAD "/repos/${GITHUB_REPOSITORY_OWNER}/${repo}/contents/.github/CODEOWNERS"; then
+        echo "--> github_repository_file.codeowners"
+        terraform import \
+          "module.repos[\"${repo}\"].github_repository_file.codeowners[0]" "${repo}/.github/CODEOWNERS:${default_branch}"
+      fi
+
+      ## branch protection
+      if gh api --silent -X HEAD "/repos/${GITHUB_REPOSITORY_OWNER}/${repo}/branches/${default_branch}/protection"; then
+        echo "--> github_branch_protection.main"
+        terraform import \
+          "module.repos[\"${repo}\"].github_branch_protection.main[0]" "${repo}:${default_branch}"
+      fi
 
     # Archived/Deleted -> state rm
     elif [[ ${annotate} == '< ' ]]; then
       echo "state rm: ${repo}"
-      terraform state rm module.repos\[\"${repo}\"\]
+      terraform state rm "module.repos[\"${repo}\"]"
     fi
 
 done < ./tmp/repos.diff
