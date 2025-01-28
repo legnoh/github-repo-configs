@@ -30,7 +30,7 @@ jobs:
       run: terraform init
     
     - name: Prepare execution
-      run: .github/workflows/prepare.sh
+      run: prepare.sh
 
     - name: Terraform Apply
       run: terraform apply -auto-approve

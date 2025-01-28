@@ -1,0 +1,42 @@
+name: test
+on:
+  workflow_dispatch:
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # - name: Get prev run's ID
+    #   id: prev-run
+    #   env:
+    #     GH_TOKEN: ${{ github.token }}
+    #   run: |
+    #     PREV_RUN_ID=$(gh run list --limit 100 \
+    #       --json databaseId,status,conclusion,name \
+    #       --jq "[.[] | select(.name==\"${{ github.workflow }}\" and .conclusion == \"success\") | .][0].databaseId"
+    #     )
+    #     echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
+
+    # - name: Download prev artifact
+    #   uses: actions/download-artifact@v4
+    #   with:
+    #     name: videos.csv
+    #     path: build
+    #     github-token: ${{ github.token }}
+    #     run-id: ${{ steps.prev-run.outputs.id }}
+
+    - name: Encrypt file
+      run: |
+        openssl enc -aes256 -pbkdf2 -md sha-256 \
+          -in test.txt -out encrypted_test.dat -pass env:PASSWORD
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
+
+    - name: Upload encrypted file
+      uses: actions/upload-artifact@v4
+      with:
+        name: encrypted_test.dat
+        path: encrypted_test.dat
