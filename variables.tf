@@ -1,5 +1,5 @@
 variable "GITHUB_OWNER" {
-  type = string
+  type        = string
   description = "Target GitHub owner username(for setting CODEOWNERS file)"
 }
 
