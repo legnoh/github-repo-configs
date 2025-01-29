@@ -70,6 +70,7 @@ jobs:
     - name: Encrypt repodata files
       if: ${{ always() }}
       run: |
+        echo "${{ steps.github-app.outputs.token }}" >> repos.auto.tfvars.json
         tar -cf - tmp terraform.tfstate repos.auto.tfvars.json \
         | openssl enc -aes256 -pbkdf2 -md sha-256 -out archive.tar.enc -pass env:PASSWORD
       env:
