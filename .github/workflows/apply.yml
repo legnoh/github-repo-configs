@@ -32,14 +32,16 @@ jobs:
     - name: Download tfstate files
       uses: actions/download-artifact@v4
       with:
-        name: tfstate
+        name: repodatas
         github-token: ${{ github.token }}
         run-id: ${{ steps.prev-run.outputs.id }}
 
     - name: Decrypt tfstate files
       run: |
-        openssl enc -d -aes256 -pbkdf2 -md sha-256 \
-          -in terraform.tfstate.enc -out terraform.tfstate -pass env:PASSWORD
+        # openssl enc -d -aes256 -pbkdf2 -md sha-256 \
+        #   -in terraform.tfstate.enc -out terraform.tfstate -pass env:PASSWORD
+        openssl enc -d -aes256 -pbkdf2 -md sha-256 -in archive.tar.enc -pass env:PASSWORD \
+        | tar -xf -
       env:
         PASSWORD: ${{ secrets.PASSWORD }}
 
