@@ -4,9 +4,8 @@
 
 GITHUB_API_URL=${GITHUB_API_URL:-"https://api.github.com"}
 GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER:?}
-GITHUB_TOKEN=${GITHUB_TOKEN:?}
 
-mkdir -p ./tmp
+rm -rf ./tmp && mkdir -p ./tmp
 
 echo "Step1: Get GitHub Repositories"
 gh repo list --no-archived --limit 1000 --json=name,defaultBranchRef,repositoryTopics,isEmpty,visibility \

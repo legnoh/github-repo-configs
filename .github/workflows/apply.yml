@@ -2,7 +2,7 @@ name: terraform-apply
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [main]
   schedule:
   - cron: 0 0 * * *
 
@@ -28,18 +28,21 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-    
+
     - name: Prepare execution
       run: ./prepare.sh
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
+    - name: Encrypt repodata files
+      run: |
+        terraform state pull > terraform.tfstate
+        tar -cf - tmp terraform.tfstate repos.auto.tfvars.json \
+        | openssl enc -aes-256-cbc -salt -out archive.tar.enc -pass env:PASSWORD
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
 
-    - name: Upload tmp folder
+    - name: Upload repodatas to artifact
       uses: actions/upload-artifact@v4
       if: ${{ always() }}
       with:
         name: repodatas
-        path: |
-          tmp/**
-          repos.auto.tfvars.json
+        path: archive.tar.enc
