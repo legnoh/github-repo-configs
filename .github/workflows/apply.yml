@@ -48,12 +48,24 @@ jobs:
         | tar -xf -
       env:
         PASSWORD: ${{ secrets.PASSWORD }}
+    
+    - name: Get GitHub App Token(for all repositories)
+      uses: actions/create-github-app-token@v1
+      id: github-app
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.APP_PRIVATE_KEY }}
+        owner: ${{ github.repository_owner }}
 
     - name: Prepare execution
       run: ./prepare.sh
+      env:
+        GH_TOKEN: ${{ steps.github-app.outputs.token }}
     
-    - name: Terraform Plan
+    - name: Terraform Apply
       run: terraform apply -auto-approve
+      env:
+        GH_TOKEN: ${{ steps.github-app.outputs.token }}
 
     - name: Encrypt repodata files
       run: |
