@@ -68,6 +68,7 @@ jobs:
         GH_TOKEN: ${{ steps.github-app.outputs.token }}
 
     - name: Encrypt repodata files
+      if: ${{ always() }}
       run: |
         tar -cf - tmp terraform.tfstate repos.auto.tfvars.json \
         | openssl enc -aes256 -pbkdf2 -md sha-256 -out archive.tar.enc -pass env:PASSWORD
