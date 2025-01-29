@@ -67,7 +67,7 @@ jobs:
     - name: TF plan
       if: github.event_name == 'pull_request_target'
       run: terraform plan
-      env: &env
+      env:
         TF_VAR_GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
@@ -75,7 +75,10 @@ jobs:
     - name: TF apply
       if: github.event_name != 'pull_request_target'
       run: terraform apply -auto-approve
-      env: *env
+      env:
+        TF_VAR_GITHUB_OWNER: ${{ github.repository_owner }}
+        GITHUB_OWNER: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
 
     - name: Encrypt tfstate files
       if: github.event_name != 'pull_request_target'
