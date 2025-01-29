@@ -2,15 +2,11 @@ name: terraform-plan
 on:
   workflow_dispatch:
   pull_request_target:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   plan:
     runs-on: ubuntu-latest
-    env:
-      TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
-      TF_WORKSPACE: ${{ secrets.TF_WORKSPACE }}
-      GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -18,8 +14,30 @@ jobs:
     - name: Setup Terraform command
       uses: hashicorp/setup-terraform@v3
       with:
-        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
         terraform_wrapper: false
+    
+    - name: Get prev run's ID
+      id: prev-run
+      run: |
+        PREV_RUN_ID=$(gh run list --limit 100 \
+          --json databaseId,conclusion,name \
+          | jq -r "[.[] | select(.name==\"terraform-apply\" and .conclusion == \"success\") | .][0].databaseId"
+        )
+        echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Download tfstate files
+      uses: actions/download-artifact@v4
+      with:
+        name: tfstate
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.prev-run.outputs.id }}
+
+    - name: Decrypt tfstate files
+      run: |
+        openssl enc -d -aes256 -pbkdf2 -md sha-256 \
+          -in terraform.tfstate.enc -out terraform.tfstate -pass env:PASSWORD
 
     - name: Terraform fmt
       run: terraform fmt -check
@@ -33,11 +51,18 @@ jobs:
     - name: Terraform Plan
       run: terraform plan
 
-    - name: Upload tmp folder
+    - name: Encrypt repodata files
+      if: ${{ always() }}
+      run: |
+        tar -cf - tmp repos.auto.tfvars.json \
+        | openssl enc -aes256 -pbkdf2 -md sha-256 \
+          -out archive.tar.enc -pass env:PASSWORD
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
+
+    - name: Upload repodatas to artifact
       uses: actions/upload-artifact@v4
       if: ${{ always() }}
       with:
         name: repodatas
-        path: |
-          tmp/**
-          repos.auto.tfvars.json
+        path: archive.tar.enc

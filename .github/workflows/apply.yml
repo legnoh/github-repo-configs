@@ -7,7 +7,7 @@ on:
   - cron: 0 0 * * *
 
 jobs:
-  plan:
+  apply:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -18,62 +18,76 @@ jobs:
       with:
         terraform_wrapper: false
 
+    - name: Get prev run's ID
+      id: prev-run
+      run: |
+        PREV_RUN_ID=$(gh run list --limit 100 \
+          --json databaseId,conclusion,name \
+          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .conclusion == \"success\") | .][0].databaseId"
+        )
+        echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Download tfstate files
+      uses: actions/download-artifact@v4
+      with:
+        name: tfstate
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.prev-run.outputs.id }}
+
+    - name: Decrypt tfstate files
+      run: |
+        openssl enc -d -aes256 -pbkdf2 -md sha-256 \
+          -in terraform.tfstate.enc -out terraform.tfstate -pass env:PASSWORD
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
+
     - name: Terraform fmt
       run: terraform fmt -check
 
     - name: Terraform Init
       run: terraform init
 
-    - name: Get prev run's ID
-      id: prev-run
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        PREV_RUN_ID=$(gh run list --limit 100 \
-          --json databaseId,status,conclusion,name \
-          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .conclusion == \"success\") | .][0].databaseId"
-        )
-        echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
-
-    - name: Download repodata files
-      uses: actions/download-artifact@v4
-      with:
-        name: repodatas
-        github-token: ${{ github.token }}
-        run-id: ${{ steps.prev-run.outputs.id }}
-
-    - name: Decrypt repodata files
-      run: |
-        openssl enc -d -aes256 -pbkdf2 -md sha-256 -in archive.tar.enc -pass env:PASSWORD \
-        | tar -xf -
-      env:
-        PASSWORD: ${{ secrets.PASSWORD }}
-    
     - name: Get GitHub App Token(for all repositories)
       uses: actions/create-github-app-token@v1
       id: github-app
       with:
-        app-id: ${{ secrets.APP_ID }}
-        private-key: ${{ secrets.APP_PRIVATE_KEY }}
+        app-id: ${{ secrets.ADMIN_BOT_APP_ID }}
+        private-key: ${{ secrets.ADMIN_BOT_APP_PRIVATE_KEY }}
         owner: ${{ github.repository_owner }}
-        skip-token-revoke: true
 
     - name: Prepare execution
       run: ./prepare.sh
       env:
-        GH_TOKEN: ${{ steps.github-app.outputs.token }}
-    
+        GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
+
     - name: Terraform Apply
       run: terraform apply -auto-approve
       env:
-        GH_TOKEN: ${{ steps.github-app.outputs.token }}
+        TF_VAR_GITHUB_OWNER: ${{ github.repository_owner }}
+        GITHUB_OWNER: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
+
+    - name: Encrypt tfstate files
+      run: |
+        openssl enc -aes256 -pbkdf2 -md sha-256 \
+          -in terraform.tfstate -out terraform.tfstate.enc -pass env:PASSWORD
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
+
+    - name: Upload tfstate to artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tfstate
+        path: terraform.tfstate.enc
 
     - name: Encrypt repodata files
       if: ${{ always() }}
       run: |
-        echo "${{ steps.github-app.outputs.token }}" >> repos.auto.tfvars.json
-        tar -cf - tmp terraform.tfstate repos.auto.tfvars.json \
-        | openssl enc -aes256 -pbkdf2 -md sha-256 -out archive.tar.enc -pass env:PASSWORD
+        tar -cf - tmp repos.auto.tfvars.json \
+        | openssl enc -aes256 -pbkdf2 -md sha-256 \
+          -out archive.tar.enc -pass env:PASSWORD
       env:
         PASSWORD: ${{ secrets.PASSWORD }}
 
