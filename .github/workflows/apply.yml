@@ -36,7 +36,7 @@ jobs:
       run: |
         terraform state pull > terraform.tfstate
         tar -cf - tmp terraform.tfstate repos.auto.tfvars.json \
-        | openssl enc -aes-256-cbc -salt -out archive.tar.enc -pass env:PASSWORD
+        | openssl enc -aes256 -pbkdf2 -md sha-256 -out archive.tar.enc -pass env:PASSWORD
       env:
         PASSWORD: ${{ secrets.PASSWORD }}
 
