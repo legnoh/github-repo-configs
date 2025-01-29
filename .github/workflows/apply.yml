@@ -9,10 +9,6 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    env:
-      TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
-      TF_WORKSPACE: ${{ secrets.TF_WORKSPACE }}
-      GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -20,7 +16,6 @@ jobs:
     - name: Setup Terraform command
       uses: hashicorp/setup-terraform@v3
       with:
-        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
         terraform_wrapper: false
 
     - name: Terraform fmt
@@ -29,12 +24,39 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
+    - name: Get prev run's ID
+      id: prev-run
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        PREV_RUN_ID=$(gh run list --limit 100 \
+          --json databaseId,status,conclusion,name \
+          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .conclusion == \"success\") | .][0].databaseId"
+        )
+        echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
+
+    - name: Download repodata files
+      uses: actions/download-artifact@v4
+      with:
+        name: repodatas
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.prev-run.outputs.id }}
+
+    - name: Decrypt repodata files
+      run: |
+        openssl enc -d -aes256 -pbkdf2 -md sha-256 -in archive.tar.enc -pass env:PASSWORD \
+        | tar -xf -
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
+
     - name: Prepare execution
       run: ./prepare.sh
+    
+    - name: Terraform Plan
+      run: terraform apply -auto-approve
 
     - name: Encrypt repodata files
       run: |
-        terraform state pull > terraform.tfstate
         tar -cf - tmp terraform.tfstate repos.auto.tfvars.json \
         | openssl enc -aes256 -pbkdf2 -md sha-256 -out archive.tar.enc -pass env:PASSWORD
       env:

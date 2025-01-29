@@ -1,4 +1,5 @@
 terraform {
-  cloud {
+  backend "local" {
+    path = "terraform.tfstate"
   }
 }
