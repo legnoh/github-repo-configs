@@ -1,8 +1,5 @@
 # github-repo-configs
 
-[![Badge](https://shields.io/badge/Terraform-app--terraform--io-blueviolet?logo=terraform&style=flat)](https://app.terraform.io/app/lkjio/workspaces/github-repo-configs)
-
-
 GitHub auto config setting script with GitHub Actions & [Terraform GitHub Provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
 
 - Public personal repository are setting automatically [you desired](https://github.com/legnoh/github-repo-configs/blob/main/modules/repo/main.tf).
@@ -10,14 +7,6 @@ GitHub auto config setting script with GitHub Actions & [Terraform GitHub Provid
 
 Usage
 ---
-
-### Requirement
-
-- Get [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
-  - Please take care of your token permission(It must be a writable token).
-    - Scope: `repo`(all), `read:org` and `read:discussion`
-- Get [Terraform Cloud User API Token](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens).
-- Change [Terraform Cloud's Execution Mode](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings#execution-mode) to "Local".
 
 ### Topic options
 
@@ -30,22 +19,33 @@ If you have any special repository, please set below topic.
 ### Command(local)
 
 ```sh
-export GITHUB_REPOSITORY_OWNER="your-github-username"
+# install gh cli for prepare script
+brew install gh
+gh auth login
+
+# define env
+export GITHUB_OWNER="your-github-username"
 export GITHUB_TOKEN="ghp_XXXX"
-export TF_CLOUD_ORGANIZATION="your-org-name"
-export TF_WORKSPACE="your-workspace-name"
-export TF_TOKEN_app_terraform_io="XXXXXX......XXXXXX"
 
 terraform init
-./.github/workflows/prepare.sh
+./prepare.sh
 terraform apply
 ```
 
 ### GitHub Actions(CI)
 
-- Please set secret below.
-  - `TF_CLOUD_ORGANIZATION`
-  - `TF_WORKSPACE`
-  - `TF_API_TOKEN` (same with `TF_TOKEN_app_terraform_io`)
-  - `WRITABLE_GITHUB_TOKEN` (same with `GITHUB_TOKEN`)
-- and execute `terraform plan` & `terraform apply` action.
+- Create [**GitHub App**](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps) for yourself.
+  - Change App [Permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app)
+    - Actions: `Read-only`
+    - Administration: `Read and write`
+    - Contents: `Read and write`
+    - Metadata: `Read-only`
+  - and install to your user.
+    - [Installing your own GitHub App - GitHub Docs](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)
+- Please set repository secret below.
+  - `ADMIN_BOT_APP_ID` (your GitHub App ID)
+  - `ADMIN_BOT_APP_PRIVATE_KEY` (your GitHub App Private key)
+  - `PASSWORD` (for encrypt your tfstate/repodata password)
+    - In this pipeline, tfstate is stored in Local Backend, then encrypted at the end of the pipeline and uploaded it to Build Artifacts.
+    - From the next time, we will call State from the previous Artifacts. Please note the storage deadline for Artifacts.
+- Execute `CI` action.

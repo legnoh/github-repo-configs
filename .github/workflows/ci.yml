@@ -25,7 +25,7 @@ jobs:
       run: |
         PREV_RUN_ID=$(gh run list --limit 100 \
           --json databaseId,conclusion,name \
-          | jq -r "[.[] | select(.name==\"terraform-apply\" and .conclusion == \"success\") | .][0].databaseId"
+          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .conclusion == \"success\") | .][0].databaseId"
         )
         echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
       env:
@@ -63,27 +63,22 @@ jobs:
       run: ./setup.sh
       env:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
-    
-    - name: Judge TF action
-      id: judge
-      run: |
-        if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
-          echo "action='terraform plan'" >> $GITHUB_OUTPUT
-        else
-          echo "action='terraform apply -auto-approve'" >> $GITHUB_OUTPUT
-        fi
-      env:
-        GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
 
-    - name: TF action
-      run: eval ${{ steps.judge.outputs.action }}
-      env:
+    - name: TF plan
+      if: github.event_name == 'pull_request_target'
+      run: terraform plan
+      env: &env
         TF_VAR_GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
 
+    - name: TF apply
+      if: github.event_name != 'pull_request_target'
+      run: terraform apply -auto-approve
+      env: *env
+
     - name: Encrypt tfstate files
-      if: steps.judge.outputs.action == 'apply -auto-approve'
+      if: github.event_name != 'pull_request_target'
       run: |
         openssl enc -aes256 -pbkdf2 -md sha-256 \
           -in terraform.tfstate -out terraform.tfstate.enc -pass env:PASSWORD
@@ -91,7 +86,7 @@ jobs:
         PASSWORD: ${{ secrets.PASSWORD }}
 
     - name: Upload tfstate to artifact
-      if: steps.judge.outputs.action == 'apply -auto-approve'
+      if: github.event_name != 'pull_request_target'
       uses: actions/upload-artifact@v4
       with:
         name: tfstate
