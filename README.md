@@ -23,19 +23,22 @@ If you have any special repository, please set below topic.
 brew install gh
 gh auth login
 
-# define env
-export GITHUB_OWNER="your-github-username"
-export GITHUB_TOKEN="ghp_XXXX"
+# define env yourself
+export GITHUB_OWNER="$(gh api user --jq .login)"
+export GITHUB_TOKEN="$(gh auth token)"
 
+# init & make tfvars file
 terraform init
 ./prepare.sh
+
+# apply
 terraform apply
 ```
 
 ### GitHub Actions(CI)
 
 - Create [**GitHub App**](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps) for yourself.
-  - Change App [Permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app)
+  - Change App [Permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) in Repository scope.
     - Actions: `Read-only`
     - Administration: `Read and write`
     - Contents: `Read and write`
@@ -49,3 +52,15 @@ terraform apply
     - In this pipeline, tfstate is stored in Local Backend, then encrypted at the end of the pipeline and uploaded it to Build Artifacts.
     - From the next time, we will call State from the previous Artifacts. Please note the storage deadline for Artifacts.
 - Execute `CI` action.
+
+> [!TIP]
+> If you debug with GitHub Action's tfstate data, get artifact and decrypt it.
+> ```sh
+> openssl enc -d -aes256 -pbkdf2 -md sha-256 -in terraform.tfstate.enc -out terraform.tfstate
+> ```
+
+## Appendix
+
+> [!NOTE]
+> If you do not use a [Signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits), be aware that `require_signed_commits` of the brunch protection is obstructed by⁠ `terraform apply`.
+> If you commit it via a GitHub App, you can avoid this problem because a commit signature is always given.
