@@ -29,7 +29,7 @@ export GITHUB_TOKEN="$(gh auth token)"
 
 # init & make tfvars file
 terraform init
-./prepare.sh
+./setup.sh
 
 # apply
 terraform apply
@@ -43,6 +43,7 @@ terraform apply
     - Administration: `Read and write`
     - Contents: `Read and write`
     - Metadata: `Read-only`
+    - Workflows: `Read and write`
   - and install to your user.
     - [Installing your own GitHub App - GitHub Docs](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)
 - Please set repository secret below.

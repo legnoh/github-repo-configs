@@ -81,7 +81,7 @@ jobs:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
 
     - name: Encrypt tfstate files
-      if: github.event_name != 'pull_request_target'
+      if: ${{ always() }}
       run: |
         openssl enc -aes256 -pbkdf2 -md sha-256 \
           -in terraform.tfstate -out terraform.tfstate.enc -pass env:PASSWORD
@@ -89,7 +89,7 @@ jobs:
         PASSWORD: ${{ secrets.PASSWORD }}
 
     - name: Upload tfstate to artifact
-      if: github.event_name != 'pull_request_target'
+      if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
         name: tfstate

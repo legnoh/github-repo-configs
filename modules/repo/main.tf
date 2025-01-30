@@ -35,11 +35,27 @@ resource "github_repository_file" "codeowners" {
   repository          = github_repository.repo.name
   branch              = github_branch_default.main.branch
   file                = ".github/CODEOWNERS"
-  content             = "* @${var.user}\n"
+  content             = templatefile("${path.module}/templates/.github/CODEOWNERS.tftpl", {user = var.user})
   commit_message      = "[skip ci] update CODEOWNERS"
-  overwrite_on_create = false
+  overwrite_on_create = true
   lifecycle {
-    prevent_destroy = true
+    ignore_changes = [
+      commit_message,
+    ]
+  }
+}
+
+resource "github_repository_file" "automerge" {
+
+  count = contains(var.topics, "no-codeowners") ? 0 : 1
+
+  repository          = github_repository.repo.name
+  branch              = github_branch_default.main.branch
+  file                = ".github/workflows/automerge.yml"
+  content             = templatefile("${path.module}/templates/.github/workflows/automerge.yml.tftpl", {user = var.user})
+  commit_message      = "[skip ci] update automerge.yml"
+  overwrite_on_create = true
+  lifecycle {
     ignore_changes = [
       commit_message,
     ]

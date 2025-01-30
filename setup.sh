@@ -73,14 +73,21 @@ do
       default_branch=$(cat ./repos.auto.tfvars.json | jq -r ".repos[] | select(.name == \"${repo}\") | .default_branch")
 
       ## codeowners file
-      if gh api --silent -X HEAD "/repos/${GITHUB_REPOSITORY_OWNER}/${repo}/contents/.github/CODEOWNERS"; then
+      if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/CODEOWNERS" 2> /dev/null; then
         echo "--> github_repository_file.codeowners"
         terraform import \
           "module.repos[\"${repo}\"].github_repository_file.codeowners[0]" "${repo}/.github/CODEOWNERS:${default_branch}"
       fi
 
+      ## automerge.yml file
+      if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/workflows/automerge.yml" 2> /dev/null; then
+        echo "--> github_repository_file.codeowners"
+        terraform import \
+          "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:${default_branch}"
+      fi
+
       ## branch protection
-      if gh api --silent -X HEAD "/repos/${GITHUB_REPOSITORY_OWNER}/${repo}/branches/${default_branch}/protection"; then
+      if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/branches/${default_branch}/protection" 2> /dev/null; then
         echo "--> github_branch_protection.main"
         terraform import \
           "module.repos[\"${repo}\"].github_branch_protection.main[0]" "${repo}:${default_branch}"
