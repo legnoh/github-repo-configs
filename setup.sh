@@ -55,14 +55,6 @@ set +e
 diff ./tmp/repo_names_tf ./tmp/repo_names_gh > ./tmp/repos.diff
 set -e
 
-while read repo
-do
-  set +e
-  terraform state rm "module.repos[\"${repo}\"].github_repository_file.automerge[0]"
-  terraform import "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:main"
-  set -e
-done < ./tmp/repo_names_tf
-
 echo "Step3: Import and Destroy"
 while read diffline
 do
