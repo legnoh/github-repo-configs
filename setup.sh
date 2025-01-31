@@ -60,7 +60,7 @@ do
   if [[ "${repo}" != "openweather-exporter-fork" ]]; then
     terraform state rm "module.repos[\"${repo}\"].github_repository_file.automerge[0]"
   fi
-  if [[ "${repo}" != "obs-scripts" ]] && [[ "${repo}" != "reminder-test" ]]; then
+  if [[ "${repo}" != "go-natureremo" ]] && [[ "${repo}" != "obs-scripts" ]] && [[ "${repo}" != "reminder-test" ]]; then
     terraform import "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:main"
   fi
 done < ./tmp/repo_names_tf
