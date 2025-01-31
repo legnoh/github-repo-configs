@@ -23,9 +23,8 @@ jobs:
     - name: Get prev run's ID
       id: prev-run
       run: |
-        PREV_RUN_ID=$(gh run list --limit 100 \
-          --json databaseId,conclusion,name \
-          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .conclusion == \"success\") | .][0].databaseId"
+        PREV_RUN_ID=$(gh run list --limit 100 --json databaseId,event,name,conclusion \
+          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .event != \"pull_request_target\" and .conclusion == \"success\") | .][0].databaseId"
         )
         echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
       env:
