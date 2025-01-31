@@ -57,12 +57,10 @@ set -e
 
 while read repo
 do
-  if [[ "${repo}" != "openweather-exporter-fork" ]]; then
-    terraform state rm "module.repos[\"${repo}\"].github_repository_file.automerge[0]"
-  fi
-  if [[ "${repo}" != "go-natureremo" ]] && [[ "${repo}" != "homebridge-natureremo-fan" ]] && [[ "${repo}" != "obs-scripts" ]] && [[ "${repo}" != "reminder-test" ]]; then
-    terraform import "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:main"
-  fi
+  set +e
+  terraform state rm "module.repos[\"${repo}\"].github_repository_file.automerge[0]"
+  terraform import "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:main"
+  set -e
 done < ./tmp/repo_names_tf
 
 echo "Step3: Import and Destroy"
