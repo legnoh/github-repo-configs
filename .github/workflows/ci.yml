@@ -62,6 +62,8 @@ jobs:
       run: ./setup.sh
       env:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
+        TF_VAR_BUMP_BOT_ID: ${{ vars.BUMP_BOT_ID }}
+        TF_VAR_BUMP_BOT_PRIVATEKEY: ${{ secrets.BUMP_BOT_PRIVATEKEY }}
 
     - name: TF plan
       if: github.event_name == 'pull_request_target'
