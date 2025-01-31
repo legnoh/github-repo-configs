@@ -55,8 +55,8 @@ jobs:
       uses: actions/create-github-app-token@v1
       id: github-app
       with:
-        app-id: ${{ secrets.ADMIN_BOT_APP_ID }}
-        private-key: ${{ secrets.ADMIN_BOT_APP_PRIVATE_KEY }}
+        app-id: ${{ vars.ADMIN_BOT_ID }}
+        private-key: ${{ secrets.ADMIN_BOT_PRIVATEKEY }}
         owner: ${{ github.repository_owner }}
 
     - name: Prepare execution
@@ -71,6 +71,8 @@ jobs:
         TF_VAR_GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
+        TF_VAR_BUMP_BOT_ID: ${{ vars.BUMP_BOT_ID }}
+        TF_VAR_BUMP_BOT_PRIVATEKEY: ${{ secrets.BUMP_BOT_PRIVATEKEY }}
 
     - name: TF apply
       if: github.event_name != 'pull_request_target'
@@ -79,6 +81,8 @@ jobs:
         TF_VAR_GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
+        TF_VAR_BUMP_BOT_ID: ${{ vars.BUMP_BOT_ID }}
+        TF_VAR_BUMP_BOT_PRIVATEKEY: ${{ secrets.BUMP_BOT_PRIVATEKEY }}
 
     - name: Encrypt tfstate files
       if: ${{ always() }}

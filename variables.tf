@@ -3,6 +3,17 @@ variable "GITHUB_OWNER" {
   description = "Target GitHub owner username(for setting CODEOWNERS file)"
 }
 
+variable "BUMP_BOT_ID" {
+  type        = string
+  description = "Your bump-bot appid"
+}
+
+variable "BUMP_BOT_PRIVATEKEY" {
+  type        = string
+  sensitive   = true
+  description = "Your bump-bot Privatekey"
+}
+
 variable "repos" {
   type = list(
     object({

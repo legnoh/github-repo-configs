@@ -87,3 +87,15 @@ resource "github_branch_protection" "main" {
     contexts = var.pr_job_names
   }
 }
+
+resource "github_actions_variable" "bump_bot_id" {
+  repository       = var.name
+  variable_name    = "G_BUMP_BOT_ID"
+  value            = var.bump_bot_id
+}
+
+resource "github_actions_secret" "bump_bot_privatekey" {
+  repository       = var.name
+  secret_name      = "G_BUMP_BOT_PRIVATEKEY"
+  plaintext_value  = var.bump_bot_privatekey
+}

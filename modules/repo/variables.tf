@@ -22,3 +22,14 @@ variable "pr_job_names" {
   type = list(string)
   description = "List of job names for pull_request & pull_request_target events"
 }
+
+variable "bump_bot_id" {
+  type = string
+  description = "Target GitHub owner username(for setting CODEOWNERS file)"
+}
+
+variable "bump_bot_privatekey" {
+  type = string
+  sensitive = true
+  description = "Target GitHub owner username(for setting CODEOWNERS file)"
+}
