@@ -57,7 +57,7 @@ diff ./tmp/repo_names_tf ./tmp/repo_names_gh > ./tmp/repos.diff
 set -e
 
 while read repo; do
-  rule_id=$(gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/rulesets" | jq ".[0].id")
+  rule_id=$(gh api "/repos/${GITHUB_OWNER}/${repo}/rulesets" | jq ".[0].id")
   if [[ "${rule_id}" != "null" ]] && [[ "${rule_id}" != "" ]]; then
     terraform import \
       "module.repos[\"${repo}\"].github_repository_ruleset.main[0]" "${repo}:${rule_id}"
