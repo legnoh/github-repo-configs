@@ -62,8 +62,8 @@ while read repo; do
     terraform import \
       "module.repos[\"${repo}\"].github_repository_ruleset.main[0]" "${repo}:${rule_id}"
   fi
-  terraform state rm "module.repos[\"${repo}\"].github_branch_protection.main[0]"
   if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/branches/main/protection" 2> /dev/null; then
+    terraform state rm "module.repos[\"${repo}\"].github_branch_protection.main[0]"
     terraform import \
       "module.repos[\"${repo}\"].github_branch_protection.main[0]" "${repo}:main"
   fi
