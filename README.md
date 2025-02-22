@@ -52,6 +52,8 @@ terraform apply
 - Please set repository secret below.
   - `ADMIN_BOT_APP_ID` (your GitHub App ID)
   - `ADMIN_BOT_APP_PRIVATE_KEY` (your GitHub App Private key)
+  - `DOCKERHUB_USERNAME` (your DockerHub username)
+  - `DOCKERHUB_TOKEN` (your DockerHub PAT)
   - `PASSWORD` (for encrypt your tfstate/repodata password)
     - In this pipeline, tfstate is stored in Local Backend, then encrypted at the end of the pipeline and uploaded it to Build Artifacts.
     - From the next time, we will call State from the previous Artifacts. Please note the storage deadline for Artifacts.

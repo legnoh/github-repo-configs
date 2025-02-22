@@ -8,4 +8,6 @@ module "repos" {
   pr_job_names        = each.value.pr_job_names
   bump_bot_id         = var.BUMP_BOT_ID
   bump_bot_privatekey = var.BUMP_BOT_PRIVATEKEY
+  dockerhub_username  = var.DOCKERHUB_USERNAME
+  dockerhub_token     = var.DOCKERHUB_TOKEN
 }

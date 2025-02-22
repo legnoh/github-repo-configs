@@ -33,3 +33,14 @@ variable "bump_bot_privatekey" {
   sensitive = true
   description = "Target GitHub owner username(for setting CODEOWNERS file)"
 }
+
+variable "dockerhub_username" {
+  type = string
+  description = "Your DockerHub username"
+}
+
+variable "dockerhub_token" {
+  type = string
+  sensitive = true
+  description = "Your DockerHub Personal Access Token(PAT)"
+}

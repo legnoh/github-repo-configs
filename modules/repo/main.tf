@@ -99,3 +99,15 @@ resource "github_actions_secret" "bump_bot_privatekey" {
   secret_name      = "G_BUMP_BOT_PRIVATEKEY"
   plaintext_value  = var.bump_bot_privatekey
 }
+
+resource "github_actions_variable" "dockerhub_username" {
+  repository       = var.name
+  variable_name    = "G_DOCKERHUB_USERNAME"
+  value            = var.dockerhub_username
+}
+
+resource "github_actions_secret" "bump_bot_privatekey" {
+  repository       = var.name
+  secret_name      = "G_DOCKERHUB_TOKEN"
+  plaintext_value  = var.dockerhub_token
+}

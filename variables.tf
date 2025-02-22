@@ -14,6 +14,17 @@ variable "BUMP_BOT_PRIVATEKEY" {
   description = "Your bump-bot Privatekey"
 }
 
+variable "DOCKERHUB_USERNAME" {
+  type        = string
+  description = "Your DockerHub username"
+}
+
+variable "DOCKERHUB_TOKEN" {
+  type        = string
+  sensitive   = true
+  description = "Your DockerHub Personal Access Token(PAT)"
+}
+
 variable "repos" {
   type = list(
     object({
