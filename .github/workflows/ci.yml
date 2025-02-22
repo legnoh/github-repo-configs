@@ -64,6 +64,8 @@ jobs:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
         TF_VAR_BUMP_BOT_ID: ${{ vars.BUMP_BOT_ID }}
         TF_VAR_BUMP_BOT_PRIVATEKEY: ${{ secrets.BUMP_BOT_PRIVATEKEY }}
+        TF_VAR_AUTOMERGE_BOT_ID: ${{ vars.AUTOMERGE_BOT_ID }}
+        TF_VAR_AUTOMERGE_BOT_PRIVATEKEY: ${{ secrets.AUTOMERGE_BOT_PRIVATEKEY }}
         TF_VAR_DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
         TF_VAR_DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
@@ -76,6 +78,8 @@ jobs:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
         TF_VAR_BUMP_BOT_ID: ${{ vars.BUMP_BOT_ID }}
         TF_VAR_BUMP_BOT_PRIVATEKEY: ${{ secrets.BUMP_BOT_PRIVATEKEY }}
+        TF_VAR_AUTOMERGE_BOT_ID: ${{ vars.AUTOMERGE_BOT_ID }}
+        TF_VAR_AUTOMERGE_BOT_PRIVATEKEY: ${{ secrets.AUTOMERGE_BOT_PRIVATEKEY }}
         TF_VAR_DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
         TF_VAR_DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
@@ -88,6 +92,8 @@ jobs:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
         TF_VAR_BUMP_BOT_ID: ${{ vars.BUMP_BOT_ID }}
         TF_VAR_BUMP_BOT_PRIVATEKEY: ${{ secrets.BUMP_BOT_PRIVATEKEY }}
+        TF_VAR_AUTOMERGE_BOT_ID: ${{ vars.AUTOMERGE_BOT_ID }}
+        TF_VAR_AUTOMERGE_BOT_PRIVATEKEY: ${{ secrets.AUTOMERGE_BOT_PRIVATEKEY }}
         TF_VAR_DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
         TF_VAR_DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
