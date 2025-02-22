@@ -27,8 +27,6 @@ gh auth login
 export GITHUB_OWNER="$(gh api user --jq .login)"
 export GITHUB_TOKEN="$(gh auth token)"
 export TF_VAR_GITHUB_OWNER="${GITHUB_OWNER}"
-export TF_VAR_BUMP_BOT_ID=$(gh api "users/${GITHUB_OWNER}-bump-bot[bot]" | jq -r ".id")
-export TF_VAR_AUTOMERGE_BOT_ID=$(gh api "users/${GITHUB_OWNER}-automerge-bot[bot]" | jq -r ".id")
 export TF_VAR_DOCKERHUB_USERNAME="..."
 export TF_VAR_DOCKERHUB_TOKEN="..."
 cat bump-bot-key.pem | jq -Rs '{ BUMP_BOT_PRIVATEKEY: . }' > bump-bot.auto.tfvars.json
@@ -44,22 +42,15 @@ terraform apply
 
 ### GitHub Actions(CI)
 
-- Create [**GitHub App**](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps) for yourself.
-  - Change App [Permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) in Repository scope.
-    - Actions: `Read-only`
-    - Administration: `Read and write`
-    - Contents: `Read and write`
-    - Metadata: `Read-only`
-    - Workflows: `Read and write`
-  - and install to your user.
+- Create [** 3 GitHub App**](#3-github-apps-for-yourself) for yourself.
+  - [About creating GitHub Apps - GitHub Docs](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps)
+    - Set `Where can this GitHub App be installed?` to `Any account` (for reading App ID from terraform)
+  - And Install them.
     - [Installing your own GitHub App - GitHub Docs](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)
 - Please set repository secret below.
-  - `ADMIN_BOT_APP_ID` (your admin-bot GitHub App ID)
-  - `ADMIN_BOT_APP_PRIVATE_KEY` (your admin-bot GitHub App Private key)
-  - `BUMP_BOT_APP_ID` (your bump-bot GitHub App ID)
-  - `BUMP_BOT_APP_PRIVATE_KEY` (your bump-bot GitHub App Private key)
-  - `AUTOMERGE_BOT_APP_ID` (your automerge-bot GitHub App ID)
-  - `AUTOMERGE_BOT_PRIVATE_KEY` (your automerge-bot GitHub App Private key)
+  - `ADMIN_BOT_PRIVATEKEY` (your admin-bot GitHub App Private key)
+  - `BUMP_BOT_PRIVATEKEY` (your bump-bot GitHub App Private key)
+  - `AUTOMERGE_BOT_PRIVATEKEY` (your automerge-bot GitHub App Private key)
   - `DOCKERHUB_USERNAME` (your DockerHub username)
   - `DOCKERHUB_TOKEN` (your DockerHub PAT)
   - `PASSWORD` (for encrypt your tfstate/repodata password)
@@ -79,7 +70,7 @@ terraform apply
 > If you do not use a [Signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits), be aware that `require_signed_commits` of the brunch protection is obstructed by⁠ `terraform apply`.
 > If you commit it via a GitHub App, you can avoid this problem because a commit signature is always given.
 
-### Two GitHub Apps for yourself
+### 3 GitHub Apps for yourself
 
 For long-term operation of multiple OSS on GitHub, it is recommended to always create two GitHub Apps:
 
