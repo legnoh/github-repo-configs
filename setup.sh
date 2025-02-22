@@ -32,11 +32,12 @@ gh auth status
 echo "------------------"
 
 echo "Step1: Get GitHub Repositories"
-gh repo list --limit 1000 --json=name,defaultBranchRef,repositoryTopics,isEmpty,isArchived \
+gh repo list --limit 1000 --json=name,defaultBranchRef,languages,repositoryTopics,isEmpty,isArchived \
   | jq "[sort_by(.name) | .[] \
       | select(.isEmpty == false and .isArchived == false) \
       | .repositoryTopics |= if . != null then [.[].name] else [] end \
-      | { name:.name, default_branch:.defaultBranchRef.name, topics:.repositoryTopics, pr_job_names:[] } \
+      | .languages |= if length > 0 then map(.node.name) else [] end \
+      | { name:.name, default_branch:.defaultBranchRef.name, languages:.languages, topics:.repositoryTopics, pr_job_names:[] } \
     ] as \$res \
     | { repos: \$res }" > ./repos.auto.tfvars.json
 
@@ -54,6 +55,14 @@ terraform state list module.repos \
 set +e
 diff ./tmp/repo_names_tf ./tmp/repo_names_gh > ./tmp/repos.diff
 set -e
+
+while read repo; do
+  if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/workflows/uv-lock.yml" 2> /dev/null; then
+      echo "--> github_repository_file.uv_locker"
+      terraform import \
+        "module.repos[\"${repo}\"].github_repository_file.uv_locker[0]" "${repo}/.github/workflows/uv-lock.yml:main"
+  fi
+done < ./tmp/repo_names_tf
 
 echo "Step3: Import and Destroy"
 while read diffline
@@ -84,6 +93,13 @@ do
         echo "--> github_repository_file.codeowners"
         terraform import \
           "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:${default_branch}"
+      fi
+
+      ## uv-lock.yml file
+      if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/workflows/uv-lock.yml" 2> /dev/null; then
+        echo "--> github_repository_file.uv_locker"
+        terraform import \
+          "module.repos[\"${repo}\"].github_repository_file.uv_locker[0]" "${repo}/.github/workflows/uv-lock.yml:${default_branch}"
       fi
 
       ## branch protection

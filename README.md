@@ -28,7 +28,11 @@ export GITHUB_OWNER="$(gh api user --jq .login)"
 export GITHUB_TOKEN="$(gh auth token)"
 export TF_VAR_GITHUB_OWNER="${GITHUB_OWNER}"
 export TF_VAR_BUMP_BOT_ID=$(gh api "users/${GITHUB_OWNER}-bump-bot[bot]" | jq -r ".id")
-cat ./your-bot-key.pem | jq -Rs '{ private_key: . }' > bump-bot-key.auto.tfvars.json
+export TF_VAR_AUTOMERGE_BOT_ID=$(gh api "users/${GITHUB_OWNER}-automerge-bot[bot]" | jq -r ".id")
+export TF_VAR_DOCKERHUB_USERNAME="..."
+export TF_VAR_DOCKERHUB_TOKEN="..."
+cat bump-bot-key.pem | jq -Rs '{ BUMP_BOT_PRIVATEKEY: . }' > bump-bot.auto.tfvars.json
+cat automerge-bot-key.pem | jq -Rs '{ AUTOMERGE_BOT_PRIVATEKEY: . }' > automerge-bot.auto.tfvars.json
 
 # init & make tfvars file
 terraform init
