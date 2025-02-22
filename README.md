@@ -50,8 +50,12 @@ terraform apply
   - and install to your user.
     - [Installing your own GitHub App - GitHub Docs](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)
 - Please set repository secret below.
-  - `ADMIN_BOT_APP_ID` (your GitHub App ID)
-  - `ADMIN_BOT_APP_PRIVATE_KEY` (your GitHub App Private key)
+  - `ADMIN_BOT_APP_ID` (your admin-bot GitHub App ID)
+  - `ADMIN_BOT_APP_PRIVATE_KEY` (your admin-bot GitHub App Private key)
+  - `BUMP_BOT_APP_ID` (your bump-bot GitHub App ID)
+  - `BUMP_BOT_APP_PRIVATE_KEY` (your bump-bot GitHub App Private key)
+  - `AUTOMERGE_BOT_APP_ID` (your automerge-bot GitHub App ID)
+  - `AUTOMERGE_BOT_PRIVATE_KEY` (your automerge-bot GitHub App Private key)
   - `DOCKERHUB_USERNAME` (your DockerHub username)
   - `DOCKERHUB_TOKEN` (your DockerHub PAT)
   - `PASSWORD` (for encrypt your tfstate/repodata password)
@@ -76,12 +80,18 @@ terraform apply
 For long-term operation of multiple OSS on GitHub, it is recommended to always create two GitHub Apps:
 
 1. **Bump bot**
-  - This bot is responsible for tasks like creating PRs during dependency library version updates and performing auto-merges. If you're only merging PRs, GitHub Actions automatically issues a GITHUB_TOKEN by default, which makes it easy to solve the problem. However, if auto-merge is executed by GITHUB_TOKEN, when you trigger the action yourself, a restriction prevents the subsequent job (such as a push job after merging) from running. A bot is needed to prevent this issue in a more general way.
+  - This bot is in charge of the task of creating PRs while updating dependency library versions.
   - Scope:
     - Contents: `Read and write`
     - Metadata: `Read-only`
     - Pull Requests: `Read and write`
-2. **Admin bot**
+1. **Automerge bot**
+  - This bot is responsible for automatically merging PRs issued by Dependabot and bump-bot. When merging only PRs, GitHub Actions automatically issues a `GITHUB_TOKEN` by default, making the process straightforward. However, if Auto-Merge is executed using `GITHUB_TOKEN`, triggering an action manually can cause limitations that prevent subsequent jobs (such as push jobs after merging) from running. To prevent this issue in a more general way, a bot is required.
+  - Scope:
+    - Contents: `Read and write`
+    - Metadata: `Read-only`
+    - Pull Requests: `Read and write`
+1. **Admin bot**
   - This bot is used to perform operations that require change permissions on all repositories, like in this repository. You can also grant these permissions (scope) to the bump bot, but that would give it very broad privileges. By separating the roles of who makes the changes as much as possible, you can minimize the potential negative consequences if any issues arise.
   - Scope:
     - Actions: `Read-only`

@@ -14,6 +14,17 @@ variable "BUMP_BOT_PRIVATEKEY" {
   description = "Your bump-bot Privatekey"
 }
 
+variable "AUTOMERGE_BOT_ID" {
+  type        = string
+  description = "Your automerge-bot appid"
+}
+
+variable "AUTOMERGE_BOT_PRIVATEKEY" {
+  type        = string
+  sensitive   = true
+  description = "Your automerge-bot Privatekey"
+}
+
 variable "DOCKERHUB_USERNAME" {
   type        = string
   description = "Your DockerHub username"

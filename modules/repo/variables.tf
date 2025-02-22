@@ -25,13 +25,24 @@ variable "pr_job_names" {
 
 variable "bump_bot_id" {
   type = string
-  description = "Target GitHub owner username(for setting CODEOWNERS file)"
+  description = "Bump bot appid"
 }
 
 variable "bump_bot_privatekey" {
   type = string
   sensitive = true
-  description = "Target GitHub owner username(for setting CODEOWNERS file)"
+  description = "Bump bot privatekey"
+}
+
+variable "automerge_bot_id" {
+  type = string
+  description = "Automerge bot appid"
+}
+
+variable "automerge_bot_privatekey" {
+  type = string
+  sensitive = true
+  description = "Automerge bot privatekey"
 }
 
 variable "dockerhub_username" {

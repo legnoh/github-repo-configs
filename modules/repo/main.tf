@@ -100,6 +100,18 @@ resource "github_actions_secret" "bump_bot_privatekey" {
   plaintext_value  = var.bump_bot_privatekey
 }
 
+resource "github_actions_variable" "automerge_bot_id" {
+  repository       = var.name
+  variable_name    = "G_AUTOMERGE_BOT_ID"
+  value            = var.automerge_bot_id
+}
+
+resource "github_actions_secret" "automerge_bot_privatekey" {
+  repository       = var.name
+  secret_name      = "G_AUTOMERGE_BOT_PRIVATEKEY"
+  plaintext_value  = var.automerge_bot_privatekey
+}
+
 resource "github_actions_variable" "dockerhub_username" {
   repository       = var.name
   variable_name    = "G_DOCKERHUB_USERNAME"
