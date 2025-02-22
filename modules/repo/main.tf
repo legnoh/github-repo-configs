@@ -79,32 +79,6 @@ resource "github_repository_file" "uv_locker" {
   }
 }
 
-resource "github_branch_protection" "main" {
-  
-  count = contains(var.topics, "no-branch-protection") ? 0 : 1
-
-  repository_id    = github_repository.repo.node_id
-  pattern          = github_branch_default.main.branch
-
-  allows_force_pushes = true
-  allows_deletions = false
-  enforce_admins   = false
-  
-  require_signed_commits = true
-  require_conversation_resolution = true
-  required_linear_history = true
-
-  required_pull_request_reviews {
-    dismiss_stale_reviews           = true
-    required_approving_review_count = 1
-  }
-  
-  required_status_checks {
-    strict   = true
-    contexts = var.pr_job_names
-  }
-}
-
 resource "github_repository_ruleset" "main" {
 
   count = contains(var.topics, "no-branch-protection") ? 0 : 1
@@ -119,6 +93,12 @@ resource "github_repository_ruleset" "main" {
       include = ["~DEFAULT_BRANCH"]
       exclude = []
     }
+  }
+
+  bypass_actors {
+    actor_id    = 5 # Repository Admin
+    actor_type  = "RepositoryRole"
+    bypass_mode = "always"
   }
 
   dynamic "bypass_actors" {
