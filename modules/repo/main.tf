@@ -30,12 +30,12 @@ resource "github_branch_default" "main" {
 
 resource "github_repository_file" "codeowners" {
 
-  count = contains(var.topics, "no-codeowners") ? 0 : 1
+  count = contains(var.topics, "no-codeowners") ? 0 : 1 
 
   repository          = github_repository.repo.name
   branch              = github_branch_default.main.branch
   file                = ".github/CODEOWNERS"
-  content             = templatefile("${path.module}/templates/.github/CODEOWNERS.tftpl", { user = var.user })
+  content             = templatefile("${path.module}/templates/.github/CODEOWNERS.tftpl", {user = var.user})
   commit_message      = "[skip ci] update CODEOWNERS"
   overwrite_on_create = true
   lifecycle {
@@ -52,7 +52,7 @@ resource "github_repository_file" "automerge" {
   repository          = github_repository.repo.name
   branch              = github_branch_default.main.branch
   file                = ".github/workflows/automerge.yml"
-  content             = templatefile("${path.module}/templates/.github/workflows/automerge.yml.tftpl", { user = var.user })
+  content             = templatefile("${path.module}/templates/.github/workflows/automerge.yml.tftpl", {user = var.user})
   commit_message      = "[skip ci] update automerge.yml"
   overwrite_on_create = true
   lifecycle {
@@ -69,13 +69,39 @@ resource "github_repository_file" "uv_locker" {
   repository          = github_repository.repo.name
   branch              = github_branch_default.main.branch
   file                = ".github/workflows/uv-lock.yml"
-  content             = templatefile("${path.module}/templates/.github/workflows/uv-lock.yml.tftpl", { user = var.user })
+  content             = templatefile("${path.module}/templates/.github/workflows/uv-lock.yml.tftpl", {user = var.user})
   commit_message      = "[skip ci] update uv-lock.yml"
   overwrite_on_create = true
   lifecycle {
     ignore_changes = [
       commit_message,
     ]
+  }
+}
+
+resource "github_branch_protection" "main" {
+  
+  count = contains(var.topics, "no-branch-protection") ? 0 : 1
+
+  repository_id    = github_repository.repo.node_id
+  pattern          = github_branch_default.main.branch
+
+  allows_force_pushes = true
+  allows_deletions = false
+  enforce_admins   = false
+  
+  require_signed_commits = true
+  require_conversation_resolution = true
+  required_linear_history = true
+
+  required_pull_request_reviews {
+    dismiss_stale_reviews           = true
+    required_approving_review_count = 1
+  }
+  
+  required_status_checks {
+    strict   = true
+    contexts = var.pr_job_names
   }
 }
 
@@ -112,8 +138,8 @@ resource "github_repository_ruleset" "main" {
     required_signatures     = true
 
     pull_request {
-      required_approving_review_count   = 1
-      dismiss_stale_reviews_on_push     = true
+      required_approving_review_count = 1
+      dismiss_stale_reviews_on_push = true
       required_review_thread_resolution = true
     }
 
@@ -124,7 +150,7 @@ resource "github_repository_ruleset" "main" {
         dynamic "required_check" {
           for_each = var.pr_job_names
           content {
-            context        = required_check.value
+            context = required_check.value
             integration_id = var.github_actions_app_id
           }
         }
@@ -134,37 +160,37 @@ resource "github_repository_ruleset" "main" {
 }
 
 resource "github_actions_variable" "bump_bot_id" {
-  repository    = var.name
-  variable_name = "G_BUMP_BOT_ID"
-  value         = var.bump_bot_id
+  repository       = var.name
+  variable_name    = "G_BUMP_BOT_ID"
+  value            = var.bump_bot_id
 }
 
 resource "github_actions_secret" "bump_bot_privatekey" {
-  repository      = var.name
-  secret_name     = "G_BUMP_BOT_PRIVATEKEY"
-  plaintext_value = var.bump_bot_privatekey
+  repository       = var.name
+  secret_name      = "G_BUMP_BOT_PRIVATEKEY"
+  plaintext_value  = var.bump_bot_privatekey
 }
 
 resource "github_actions_variable" "automerge_bot_id" {
-  repository    = var.name
-  variable_name = "G_AUTOMERGE_BOT_ID"
-  value         = var.automerge_bot_id
+  repository       = var.name
+  variable_name    = "G_AUTOMERGE_BOT_ID"
+  value            = var.automerge_bot_id
 }
 
 resource "github_actions_secret" "automerge_bot_privatekey" {
-  repository      = var.name
-  secret_name     = "G_AUTOMERGE_BOT_PRIVATEKEY"
-  plaintext_value = var.automerge_bot_privatekey
+  repository       = var.name
+  secret_name      = "G_AUTOMERGE_BOT_PRIVATEKEY"
+  plaintext_value  = var.automerge_bot_privatekey
 }
 
 resource "github_actions_variable" "dockerhub_username" {
-  repository    = var.name
-  variable_name = "G_DOCKERHUB_USERNAME"
-  value         = var.dockerhub_username
+  repository       = var.name
+  variable_name    = "G_DOCKERHUB_USERNAME"
+  value            = var.dockerhub_username
 }
 
 resource "github_actions_secret" "dockerhub_token" {
-  repository      = var.name
-  secret_name     = "G_DOCKERHUB_TOKEN"
-  plaintext_value = var.dockerhub_token
+  repository       = var.name
+  secret_name      = "G_DOCKERHUB_TOKEN"
+  plaintext_value  = var.dockerhub_token
 }

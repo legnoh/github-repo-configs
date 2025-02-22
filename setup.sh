@@ -56,6 +56,19 @@ set +e
 diff ./tmp/repo_names_tf ./tmp/repo_names_gh > ./tmp/repos.diff
 set -e
 
+while read repo; do
+  rule_id=$(gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/rulesets/" | jq ".[0].id")
+  if [[ "${rule_id}" != "null" ]]; then
+    terraform import \
+      "module.repos[\"${repo}\"].github_repository_ruleset.main[0]" "${repo}:${rule_id}"
+  fi
+  terraform state rm "module.repos[\"${repo}\"].github_branch_protection.main[0]"
+  if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/branches/main/protection" 2> /dev/null; then
+    terraform import \
+      "module.repos[\"${repo}\"].github_branch_protection.main[0]" "${repo}:main"
+  fi
+done < ./tmp/repo_names_tf
+
 echo "Step3: Import and Destroy"
 while read diffline
 do
