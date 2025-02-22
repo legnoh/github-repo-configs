@@ -56,14 +56,6 @@ set +e
 diff ./tmp/repo_names_tf ./tmp/repo_names_gh > ./tmp/repos.diff
 set -e
 
-while read repo; do
-  if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/workflows/uv-lock.yml" 2> /dev/null; then
-      echo "--> github_repository_file.uv_locker"
-      terraform import \
-        "module.repos[\"${repo}\"].github_repository_file.uv_locker[0]" "${repo}/.github/workflows/uv-lock.yml:main"
-  fi
-done < ./tmp/repo_names_tf
-
 echo "Step3: Import and Destroy"
 while read diffline
 do
