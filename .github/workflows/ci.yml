@@ -51,7 +51,7 @@ jobs:
       run: terraform init
 
     - name: Get GitHub App Token(for all repositories)
-      uses: actions/create-github-app-token@v1
+      uses: actions/create-github-app-token@v2
       id: github-app
       with:
         app-id: ${{ vars.ADMIN_BOT_ID }}
