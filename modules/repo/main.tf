@@ -62,23 +62,6 @@ resource "github_repository_file" "automerge" {
   }
 }
 
-resource "github_repository_file" "uv_locker" {
-
-  count = github_repository.repo.primary_language == "Python" ? 1 : 0
-
-  repository          = github_repository.repo.name
-  branch              = github_branch_default.main.branch
-  file                = ".github/workflows/uv-lock.yml"
-  content             = templatefile("${path.module}/templates/.github/workflows/uv-lock.yml.tftpl", {user = var.user})
-  commit_message      = "[skip ci] update uv-lock.yml"
-  overwrite_on_create = true
-  lifecycle {
-    ignore_changes = [
-      commit_message,
-    ]
-  }
-}
-
 resource "github_repository_ruleset" "main" {
 
   count = contains(var.topics, "no-branch-protection") ? 0 : 1
