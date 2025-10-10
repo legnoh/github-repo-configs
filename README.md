@@ -1,4 +1,4 @@
-# github-repo-configs
+# github-repo-configs test
 
 GitHub auto config setting script with GitHub Actions & [Terraform GitHub Provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
 
