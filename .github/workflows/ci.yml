@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-  pull_request_target:
+  pull_request:
     branches: [main]
   schedule:
   - cron: 0 0 * * *
@@ -23,16 +23,18 @@ jobs:
         terraform_wrapper: false
 
     - name: Get prev run's ID
+      if: github.event_name != 'pull_request'
       id: prev-run
       run: |
         PREV_RUN_ID=$(gh run list --limit 100 --json databaseId,event,name,conclusion \
-          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .event != \"pull_request_target\" and .conclusion == \"success\") | .][0].databaseId"
+          | jq -r "[.[] | select(.name==\"${{ github.workflow }}\" and .event != \"pull_request\" and .conclusion == \"success\") | .][0].databaseId"
         )
         echo "id=${PREV_RUN_ID}" >> $GITHUB_OUTPUT
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
     - name: Download tfstate files
+      if: github.event_name != 'pull_request'
       uses: actions/download-artifact@v5
       with:
         name: tfstate
@@ -40,6 +42,7 @@ jobs:
         run-id: ${{ steps.prev-run.outputs.id }}
 
     - name: Decrypt tfstate files
+      if: github.event_name != 'pull_request'
       run: |
         openssl enc -d -aes256 -pbkdf2 -md sha-256 \
           -in terraform.tfstate.enc -out terraform.tfstate -pass env:PASSWORD
@@ -52,7 +55,12 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
+    - name: TF validate
+      if: github.event_name == 'pull_request'
+      run: terraform validate
+
     - name: Get GitHub App Token(for all repositories)
+      if: github.event_name != 'pull_request'
       uses: actions/create-github-app-token@v2
       id: github-app
       with:
@@ -61,6 +69,7 @@ jobs:
         owner: ${{ github.repository_owner }}
 
     - name: Prepare execution
+      if: github.event_name != 'pull_request'
       run: ./setup.sh
       env:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
@@ -71,20 +80,8 @@ jobs:
         TF_VAR_DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
         TF_VAR_DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: TF plan
-      if: github.event_name == 'pull_request_target'
-      run: terraform plan
-      env:
-        GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
-        GITHUB_OWNER: ${{ github.repository_owner }}
-        TF_VAR_GITHUB_OWNER: ${{ github.repository_owner }}
-        TF_VAR_BUMP_BOT_PRIVATEKEY: ${{ secrets.BUMP_BOT_PRIVATEKEY }}
-        TF_VAR_AUTOMERGE_BOT_PRIVATEKEY: ${{ secrets.AUTOMERGE_BOT_PRIVATEKEY }}
-        TF_VAR_DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-        TF_VAR_DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
     - name: TF apply
-      if: github.event_name != 'pull_request_target'
+      if: github.event_name != 'pull_request'
       run: terraform apply -auto-approve
       env:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
@@ -96,7 +93,7 @@ jobs:
         TF_VAR_DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Encrypt tfstate files
-      if: ${{ always() }}
+      if: ${{ github.event_name != 'pull_request' && always() }}
       run: |
         openssl enc -aes256 -pbkdf2 -md sha-256 \
           -in terraform.tfstate -out terraform.tfstate.enc -pass env:PASSWORD
@@ -104,14 +101,14 @@ jobs:
         PASSWORD: ${{ secrets.PASSWORD }}
 
     - name: Upload tfstate to artifact
-      if: ${{ always() }}
+      if: ${{ github.event_name != 'pull_request' && always() }}
       uses: actions/upload-artifact@v4
       with:
         name: tfstate
         path: terraform.tfstate.enc
 
     - name: Encrypt repodata files
-      if: ${{ always() }}
+      if: ${{ github.event_name != 'pull_request' && always() }}
       run: |
         tar -cf - tmp repos.auto.tfvars.json \
         | openssl enc -aes256 -pbkdf2 -md sha-256 \
@@ -120,8 +117,8 @@ jobs:
         PASSWORD: ${{ secrets.PASSWORD }}
 
     - name: Upload repodatas to artifact
+      if: ${{ github.event_name != 'pull_request' && always() }}
       uses: actions/upload-artifact@v4
-      if: ${{ always() }}
       with:
         name: repodatas
         path: archive.tar.enc
