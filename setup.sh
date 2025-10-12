@@ -102,6 +102,44 @@ do
           "module.repos[\"${repo}\"].github_repository_ruleset.main[0]" "${repo}:${rule_id}"
       fi
 
+      ## variables
+      if gh api --silent "/repos/${GITHUB_OWNER}/${repo}/actions/variables" --jq '.variables[] | select(.name == "G_BUMP_BOT_ID") | .name' 2> /dev/null | grep -q "G_BUMP_BOT_ID"; then
+        echo "--> github_actions_variable.bump_bot_id"
+        terraform import \
+          "module.repos[\"${repo}\"].github_actions_variable.bump_bot_id" "${repo}:G_BUMP_BOT_ID"
+      fi
+
+      if gh api --silent "/repos/${GITHUB_OWNER}/${repo}/actions/variables" --jq '.variables[] | select(.name == "G_AUTOMERGE_BOT_ID") | .name' 2> /dev/null | grep -q "G_AUTOMERGE_BOT_ID"; then
+        echo "--> github_actions_variable.automerge_bot_id"
+        terraform import \
+          "module.repos[\"${repo}\"].github_actions_variable.automerge_bot_id" "${repo}:G_AUTOMERGE_BOT_ID"
+      fi
+
+      if gh api --silent "/repos/${GITHUB_OWNER}/${repo}/actions/variables" --jq '.variables[] | select(.name == "G_DOCKERHUB_USERNAME") | .name' 2> /dev/null | grep -q "G_DOCKERHUB_USERNAME"; then
+        echo "--> github_actions_variable.dockerhub_username"
+        terraform import \
+          "module.repos[\"${repo}\"].github_actions_variable.dockerhub_username" "${repo}:G_DOCKERHUB_USERNAME"
+      fi
+
+      ## secrets
+      if gh api --silent "/repos/${GITHUB_OWNER}/${repo}/actions/secrets" --jq '.secrets[] | select(.name == "G_BUMP_BOT_PRIVATEKEY") | .name' 2> /dev/null | grep -q "G_BUMP_BOT_PRIVATEKEY"; then
+        echo "--> github_actions_secret.bump_bot_privatekey"
+        terraform import \
+          "module.repos[\"${repo}\"].github_actions_secret.bump_bot_privatekey" "${repo}:G_BUMP_BOT_PRIVATEKEY"
+      fi
+
+      if gh api --silent "/repos/${GITHUB_OWNER}/${repo}/actions/secrets" --jq '.secrets[] | select(.name == "G_AUTOMERGE_BOT_PRIVATEKEY") | .name' 2> /dev/null | grep -q "G_AUTOMERGE_BOT_PRIVATEKEY"; then
+        echo "--> github_actions_secret.automerge_bot_privatekey"
+        terraform import \
+          "module.repos[\"${repo}\"].github_actions_secret.automerge_bot_privatekey" "${repo}:G_AUTOMERGE_BOT_PRIVATEKEY"
+      fi
+
+      if gh api --silent "/repos/${GITHUB_OWNER}/${repo}/actions/secrets" --jq '.secrets[] | select(.name == "G_DOCKERHUB_TOKEN") | .name' 2> /dev/null | grep -q "G_DOCKERHUB_TOKEN"; then
+        echo "--> github_actions_secret.dockerhub_token"
+        terraform import \
+          "module.repos[\"${repo}\"].github_actions_secret.dockerhub_token" "${repo}:G_DOCKERHUB_TOKEN"
+      fi
+
     # Archived/Deleted -> state rm
     elif [[ ${annotate} == '< ' ]]; then
       echo "state rm: ${repo}"
