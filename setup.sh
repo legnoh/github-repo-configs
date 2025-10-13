@@ -125,19 +125,19 @@ do
       if gh api "/repos/${GITHUB_OWNER}/${repo}/actions/secrets" --jq '.secrets[] | select(.name == "G_BUMP_BOT_PRIVATEKEY") | .name' 2> /dev/null | grep -q "G_BUMP_BOT_PRIVATEKEY"; then
         echo "--> github_actions_secret.bump_bot_privatekey"
         terraform import \
-          "module.repos[\"${repo}\"].github_actions_secret.bump_bot_privatekey" "${repo}:G_BUMP_BOT_PRIVATEKEY"
+          "module.repos[\"${repo}\"].github_actions_secret.bump_bot_privatekey" "${repo}/G_BUMP_BOT_PRIVATEKEY"
       fi
 
       if gh api "/repos/${GITHUB_OWNER}/${repo}/actions/secrets" --jq '.secrets[] | select(.name == "G_AUTOMERGE_BOT_PRIVATEKEY") | .name' 2> /dev/null | grep -q "G_AUTOMERGE_BOT_PRIVATEKEY"; then
         echo "--> github_actions_secret.automerge_bot_privatekey"
         terraform import \
-          "module.repos[\"${repo}\"].github_actions_secret.automerge_bot_privatekey" "${repo}:G_AUTOMERGE_BOT_PRIVATEKEY"
+          "module.repos[\"${repo}\"].github_actions_secret.automerge_bot_privatekey" "${repo}/G_AUTOMERGE_BOT_PRIVATEKEY"
       fi
 
       if gh api "/repos/${GITHUB_OWNER}/${repo}/actions/secrets" --jq '.secrets[] | select(.name == "G_DOCKERHUB_TOKEN") | .name' 2> /dev/null | grep -q "G_DOCKERHUB_TOKEN"; then
         echo "--> github_actions_secret.dockerhub_token"
         terraform import \
-          "module.repos[\"${repo}\"].github_actions_secret.dockerhub_token" "${repo}:G_DOCKERHUB_TOKEN"
+          "module.repos[\"${repo}\"].github_actions_secret.dockerhub_token" "${repo}/G_DOCKERHUB_TOKEN"
       fi
 
     # Archived/Deleted -> state rm
