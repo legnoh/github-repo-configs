@@ -102,7 +102,7 @@ jobs:
 
     - name: Upload tfstate to artifact
       if: ${{ github.event_name != 'pull_request' && always() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: tfstate
         path: terraform.tfstate.enc
@@ -118,7 +118,7 @@ jobs:
 
     - name: Upload repodatas to artifact
       if: ${{ github.event_name != 'pull_request' && always() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: repodatas
         path: archive.tar.enc
