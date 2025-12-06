@@ -16,6 +16,9 @@ resource "github_repository" "repo" {
       homepage_url,
       template,
       topics,
+      fork,
+      source_owner,
+      source_repo,
     ]
   }
 }
