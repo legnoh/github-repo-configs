@@ -35,7 +35,7 @@ jobs:
 
     - name: Download tfstate files
       if: github.event_name != 'pull_request'
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: tfstate
         github-token: ${{ github.token }}
