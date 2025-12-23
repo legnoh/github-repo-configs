@@ -1,6 +1,6 @@
 # github-repo-configs
 
-GitHub auto config setting script with GitHub Actions & [Terraform GitHub Provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
+GitHub auto config setting script with GitHub Actions & [OpenTofu GitHub Provider](https://search.opentofu.org/provider/opentofu/github/latest).
 
 - Public personal repository are setting automatically [you desired](https://github.com/legnoh/github-repo-configs/blob/main/modules/repo/main.tf).
 - States are automatically controlled if you created,archived or deleted repository.
@@ -33,18 +33,18 @@ cat bump-bot-key.pem | jq -Rs '{ BUMP_BOT_PRIVATEKEY: . }' > bump-bot.auto.tfvar
 cat automerge-bot-key.pem | jq -Rs '{ AUTOMERGE_BOT_PRIVATEKEY: . }' > automerge-bot.auto.tfvars.json
 
 # init & make tfvars file
-terraform init
+tofu init
 ./setup.sh
 
 # apply
-terraform apply
+tofu apply
 ```
 
 ### GitHub Actions(CI)
 
 - Create [** 3 GitHub App**](#3-github-apps-for-yourself) for yourself.
   - [About creating GitHub Apps - GitHub Docs](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps)
-    - Set `Where can this GitHub App be installed?` to `Any account` (for reading App ID from terraform)
+    - Set `Where can this GitHub App be installed?` to `Any account` (for reading App ID from tofu)
   - And Install them.
     - [Installing your own GitHub App - GitHub Docs](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)
 - Please set repository secret below.
@@ -67,7 +67,7 @@ terraform apply
 ## Appendix
 
 > [!NOTE]
-> If you do not use a [Signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits), be aware that `require_signed_commits` of the brunch protection is obstructed by⁠ `terraform apply`.
+> If you do not use a [Signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits), be aware that `require_signed_commits` of the brunch protection is obstructed by⁠ `tofu apply`.
 > If you commit it via a GitHub App, you can avoid this problem because a commit signature is always given.
 
 ### 3 GitHub Apps for yourself

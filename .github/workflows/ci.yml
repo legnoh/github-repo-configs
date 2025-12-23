@@ -17,10 +17,10 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v6
 
-    - name: Setup Terraform command
-      uses: hashicorp/setup-terraform@v3
+    - name: Setup tofu command
+      uses: opentofu/setup-opentofu@v1
       with:
-        terraform_wrapper: false
+        tofu_wrapper: false
 
     - name: Get prev run's ID
       if: github.event_name != 'pull_request'
@@ -49,15 +49,15 @@ jobs:
       env:
         PASSWORD: ${{ secrets.PASSWORD }}
 
-    - name: Terraform fmt
-      run: terraform fmt -check
+    - name: tofu fmt
+      run: tofu fmt -check
 
-    - name: Terraform Init
-      run: terraform init
+    - name: tofu init
+      run: tofu init
 
-    - name: TF validate
+    - name: tofu validate
       if: github.event_name == 'pull_request'
-      run: terraform validate
+      run: tofu validate
 
     - name: Get GitHub App Token(for all repositories)
       if: github.event_name != 'pull_request'
@@ -82,7 +82,7 @@ jobs:
 
     - name: TF apply
       if: github.event_name != 'pull_request'
-      run: terraform apply -auto-approve
+      run: tofu apply -auto-approve
       env:
         GITHUB_TOKEN: ${{ steps.github-app.outputs.token }}
         GITHUB_OWNER: ${{ github.repository_owner }}
