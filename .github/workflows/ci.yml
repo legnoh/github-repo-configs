@@ -61,7 +61,7 @@ jobs:
 
     - name: Get GitHub App Token(for all repositories)
       if: github.event_name != 'pull_request'
-      uses: actions/create-github-app-token@v2
+      uses: actions/create-github-app-token@v3
       id: github-app
       with:
         app-id: ${{ vars.ADMIN_BOT_ID }}
