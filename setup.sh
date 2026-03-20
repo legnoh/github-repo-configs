@@ -41,7 +41,7 @@ gh repo list --limit 1000 --json=name,defaultBranchRef,languages,repositoryTopic
     ] as \$res \
     | { repos: \$res }" > ./repos.auto.tfvars.json
 
-cat ./repos.auto.tfvars.json | jq -r ".repos[].name" > ./tmp/repo_names_gh
+cat ./repos.auto.tfvars.json | jq -r ".repos[].name" | sort > ./tmp/repo_names_gh
 if [[ $(cat ./tmp/repo_names_gh | wc -l) -eq 0 ]]; then
   echo "repo_names file is something wrong. exit."
   exit 1
@@ -82,16 +82,16 @@ do
 
       ## automerge.yml file
       if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/workflows/automerge.yml" 2> /dev/null; then
-        echo "--> github_repository_file.codeowners"
+        echo "--> github_repository_file.automerge"
         tofu import \
           "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:${default_branch}"
       fi
 
-      ## uv-lock.yml file
-      if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/workflows/uv-lock.yml" 2> /dev/null; then
-        echo "--> github_repository_file.uv_locker"
+      ## renovate.json file
+      if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/renovate.json" 2> /dev/null; then
+        echo "--> github_repository_file.renovate"
         tofu import \
-          "module.repos[\"${repo}\"].github_repository_file.uv_locker[0]" "${repo}/.github/workflows/uv-lock.yml:${default_branch}"
+          "module.repos[\"${repo}\"].github_repository_file.renovate[0]" "${repo}/renovate.json:${default_branch}"
       fi
 
       ## ruleset

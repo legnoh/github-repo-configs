@@ -15,6 +15,8 @@ If you have any special repository, please set below topic.
 
 - `no-codeowners`: `.github/CODEOWNERS` file isn't created.
 - `no-branch-protection`: Branch Protection Rule isn't created.
+- `no-automerge`: `.github/workflows/automerge.yml` file isn't created.
+- `no-renovate`: renovate app isn't installed to the repository and `renovate.json` file isn't created.
 
 ### Command(local)
 

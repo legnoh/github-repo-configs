@@ -50,13 +50,30 @@ resource "github_repository_file" "codeowners" {
 
 resource "github_repository_file" "automerge" {
 
-  count = contains(var.topics, "no-codeowners") ? 0 : 1
+  count = contains(var.topics, "no-automerge") ? 0 : 1
 
   repository          = github_repository.repo.name
   branch              = github_branch_default.main.branch
   file                = ".github/workflows/automerge.yml"
   content             = templatefile("${path.module}/templates/.github/workflows/automerge.yml.tftpl", {user = var.user})
   commit_message      = "[skip ci] update automerge.yml"
+  overwrite_on_create = true
+  lifecycle {
+    ignore_changes = [
+      commit_message,
+    ]
+  }
+}
+
+resource "github_repository_file" "renovate" {
+
+  count = contains(var.topics, "no-renovate") ? 0 : 1
+
+  repository          = github_repository.repo.name
+  branch              = github_branch_default.main.branch
+  file                = "renovate.json"
+  content             = templatefile("${path.module}/templates/renovate.json.tftpl", {user = var.user})
+  commit_message      = "[skip ci] update renovate.json"
   overwrite_on_create = true
   lifecycle {
     ignore_changes = [
