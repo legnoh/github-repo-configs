@@ -77,21 +77,21 @@ do
       if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/CODEOWNERS" 2> /dev/null; then
         echo "--> github_repository_file.codeowners"
         tofu import \
-          "module.repos[\"${repo}\"].github_repository_file.codeowners[0]" "${repo}/.github/CODEOWNERS:${default_branch}"
+          "module.repos[\"${repo}\"].github_repository_file.codeowners[0]" "${repo}:.github/CODEOWNERS:${default_branch}"
       fi
 
       ## automerge.yml file
       if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/.github/workflows/automerge.yml" 2> /dev/null; then
         echo "--> github_repository_file.automerge"
         tofu import \
-          "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}/.github/workflows/automerge.yml:${default_branch}"
+          "module.repos[\"${repo}\"].github_repository_file.automerge[0]" "${repo}:.github/workflows/automerge.yml:${default_branch}"
       fi
 
       ## renovate.json file
       if gh api --silent -X HEAD "/repos/${GITHUB_OWNER}/${repo}/contents/renovate.json" 2> /dev/null; then
         echo "--> github_repository_file.renovate"
         tofu import \
-          "module.repos[\"${repo}\"].github_repository_file.renovate[0]" "${repo}/renovate.json:${default_branch}"
+          "module.repos[\"${repo}\"].github_repository_file.renovate[0]" "${repo}:renovate.json:${default_branch}"
       fi
 
       ## ruleset
